@@ -1,0 +1,27 @@
+How to install advwall on a GNU/Linux system :
+
+- Clone the git repo into /usr/src
+- Symlink /usr/src/advwall/etc/advwall to /etc/advwall
+- Symlink /usr/src/advwall/etc/init.d/advwall.sh to /etc/init.d/advwall
+- Configure your rules
+- Test them (be careful with local rules, USE THE TIMER!)
+- Remove the backups made with the tests
+- Add it to the boot process.
+
+
+How to uninstall it :
+
+- Stop it
+- Remove it from the boot process
+- Remove /etc/advwall and /etc/init.d/advwall
+- Done.
+
+
+How to submit a bug :
+
+Send a email to r.meillon@servitics.fr
+
+
+
+
+Thanks using it !

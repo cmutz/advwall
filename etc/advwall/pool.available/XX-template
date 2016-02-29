@@ -1,0 +1,48 @@
+######
+# This is a template to create a new rules stack for svcwall
+#
+# CAUTION : All chains names are based on the file suffix, please respect this, because scvwall uses it to operate on theses rules, isolated from others.
+#           Example :
+#           if the file is named "52-VPN2", dedicated chains prefix must be named "VPN2" (replaces <filename suffix>)
+#
+# <filename suffix> Traffic rules
+
+# Creating new dedicated chains
+iptables -N <filename suffix>_IN
+iptables -N <filename suffix>_OUT
+iptables -N <filename suffix>_FWD
+
+# Reject INVALID state
+iptables -A <filename suffix>_IN   -m state --state INVALID -j REJECT
+iptables -A <filename suffix>_OUT  -m state --state INVALID -j REJECT
+iptables -A <filename suffix>_FWD  -m state --state INVALID -j REJECT
+
+# Redirect from main chains to dedicated chains
+iptables -A INPUT      -i <internal iface> -s <internal Network> -d <internal Network>             -j <filename suffix>_IN
+iptables -A OUTPUT     -o <internal iface> -s <internal Network> -d <internal Network>             -j <filename suffix>_OUT
+iptables -A FORWARD    -i <internal iface> -o <external iface>   -s <internal Network>  -d ${INTERNET}        -j <filename suffix>_FWD
+iptables -A FORWARD    -i <external iface> -o <internal iface>    -s ${INTERNET}        -d <internal Network> -j <filename suffix>_FWD
+
+# Chain related rules
+iptables -A <filename suffix>_IN    -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A <filename suffix>_FWD   -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Enter rules here (these bellow are for example)
+iptables -A <filename suffix>_IN    -j ACCEPT
+iptables -A <filename suffix>_OUT   -j ACCEPT
+iptables -A <filename suffix>_FWD   -j ACCEPT
+
+# Log rules
+iptables -A <filename suffix>_IN    -m limit --limit 5/minute                        -j LOG    --log-prefix "IPT <filename suffix>_IN - "
+iptables -A <filename suffix>_OUT   -m limit --limit 5/minute                        -j LOG    --log-prefix "IPT <filename suffix>_OUT - "
+iptables -A <filename suffix>_FWD   -m limit --limit 5/minute                        -j LOG    --log-prefix "IPT <filename suffix>_FWD - "
+
+# Chain default policies
+iptables -A <filename suffix>_IN   -j REJECT
+iptables -A <filename suffix>_OUT  -j REJECT
+iptables -A <filename suffix>_FWD  -j REJECT
+
+# Example of NAT rules
+iptables -t nat -A POSTROUTING -o <external iface> -s <internal Network> -j MASQUERADE
+
+######

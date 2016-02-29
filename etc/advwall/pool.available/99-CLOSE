@@ -1,0 +1,22 @@
+######
+# IPTABLES CLOSING RULES
+#
+
+# INPUT Chain
+#
+iptables -A INPUT -m limit --limit 5/minute -j LOG    --log-prefix "IPT IN - "
+#iptables -P INPUT -j DROP
+
+# OUTPUT Chain
+iptables -A OUTPUT -m limit --limit 5/minute -j LOG    --log-prefix "IPT OUT - "
+#iptables -P OUTPUT -j DROP
+
+# FORWARD Chain
+iptables -A FORWARD -m limit --limit 5/minute -j LOG    --log-prefix "IPT FWD - "
+iptables -A FORWARD -m limit --limit 5/minute -j LOG    --log-prefix "IPT FWD - "
+#iptables -P FORWARD -j DROP
+
+# POSTROUTING Chain (useless if it's not for debugging)
+#iptables -t nat -A PREROUTING   -m limit --limit 5/minute -j LOG    --log-prefix "IPT PRERT - "
+#iptables -t nat -A POSTROUTING   -m limit --limit 5/minute -j LOG    --log-prefix "IPT PSTRT - "
+######

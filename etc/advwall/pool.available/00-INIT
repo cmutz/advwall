@@ -1,0 +1,26 @@
+######
+# IPTABLES INITIAL RULES
+#
+
+# Reject INVALID state
+iptables -A INPUT    -m state --state INVALID -j REJECT
+iptables -A OUTPUT   -m state --state INVALID -j REJECT
+iptables -A FORWARD  -m state --state INVALID -j REJECT
+
+# Allowing traffic on localhost
+iptables -A INPUT    -i lo  -s 127.0.0.0/8 -d 127.0.0.0/8  -j ACCEPT
+iptables -A OUTPUT          -s 127.0.0.0/8 -d 127.0.0.0/8  -j ACCEPT
+iptables -A FORWARD  -i lo                                 -j ACCEPT
+
+# Denying traffic on non-localhost interface
+iptables -A INPUT    -s 127.0.0.0/8 -j DROP
+iptables -A INPUT    -d 127.0.0.0/8 -j DROP
+iptables -A FORWARD  -s 127.0.0.0/8 -j DROP
+iptables -A FORWARD  -d 127.0.0.0/8 -j DROP
+
+# DROP Windows Broadcast stuff
+iptables -A INPUT -s 10.254.10.0/24 -d 10.254.10.255 -j DROP
+iptables -A INPUT -s 10.254.10.0/24 -d 255.255.255.255 -j DROP
+iptables -A INPUT -s 10.254.20.0/24 -d 10.254.20.255 -j DROP
+iptables -A INPUT -s 10.254.20.0/24 -d 255.255.255.255 -j DROP
+######

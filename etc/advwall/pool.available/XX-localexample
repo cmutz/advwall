@@ -1,0 +1,42 @@
+######
+# Local Traffic rules Example
+#
+# New chains
+iptables -N local_IN
+iptables -N local_OUT
+
+# Reject INVALID state
+iptables -A local_IN  -m state --state INVALID -j REJECT
+iptables -A local_OUT -m state --state INVALID -j REJECT
+
+# Redirects allowed to chain 
+iptables -A INPUT  -i eth0 -s 0.0.0.0/0       -d <LOCAL IP>     -j local_IN
+iptables -A OUTPUT -o eth0 -s <LOCAL IP>      -d 0.0.0.0/0      -j local_OUT
+
+# chain related general rules
+iptables -A local_IN  -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A local_OUT  -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Local services rules (not clustered services)
+# Allowing SSH to <LOCAL IP>
+iptables -A local_IN  -p tcp --dport 22 -m state --state NEW -j ACCEPT
+iptables -A local_OUT -p tcp --sport 22 -m state --state NEW -j ACCEPT
+
+# DNS requests
+iptables -A local_OUT -p udp --dport 53 -m state --state NEW -j ACCEPT
+# NTP requests
+iptables -A local_OUT -p udp --sport 123 --dport 123 -m state --state NEW -j ACCEPT
+# SMTP
+iptables -A local_OUT -p tcp --dport 25 -m state --state NEW -j ACCEPT
+# HTTP
+iptables -A local_OUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+# ICMP traffic
+iptables -A local_IN -p icmp -j ACCEPT
+iptables -A local_OUT -p icmp -j ACCEPT
+
+# Closing these chains
+iptables -A local_IN    -m limit --limit 5/minute  -j LOG --log-prefix "IPT local_IN - "
+iptables -A local_IN    -j DROP
+iptables -A local_OUT   -m limit --limit 5/minute  -j LOG --log-prefix "IPT local_OUT - "
+iptables -A local_OUT   -j DROP
+######
